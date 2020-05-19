@@ -10,18 +10,20 @@ GAME RULES:
 // declare needed variables
 var scores, roundscore, activePlayer;
 
-scores = [0, 0]; // initialize array with player 1 and 2's scores
-roundscore = 0;
-activePlayer = 0; // using 0 base to match array-access
+initializeGame();
 
+function initializeGame(){
 document.getElementById('score-0').textContent = '0';
 document.getElementById('score-1').textContent = '0';
 document.getElementById('current-0').textContent = '0';
 document.getElementById('current-1').textContent = '0';
-
-
+scores = [0, 0]; // initialize array with player 1 and 2's scores
+roundscore = 0;
+activePlayer = 0;
 document.querySelector('.dice').style.display = 'none'; // uses query selector to set the initial state of the dice image to none so it doesn't display until roll dice buttn clicked
-
+if(!document.querySelector('.player-0-panel').classList.contains('active')) toggleActive();
+}
+ 
 function rollDice(){
     var dice = Math.floor(Math.random() * 6) + 1; // mimics dice rolling - will instantiate the dice variable with a value between 1-6
     var diceDOM = document.querySelector('.dice'); // instead of calling query selector multiple times, called once and object is stored as a variable
@@ -29,17 +31,46 @@ function rollDice(){
     diceDOM.style.display = 'block'; // make the src image appear in the browser
     if(dice ===1){ // if the player busts reset roundscore and dice value, also reset that players current score
         roundscore = 0;
-        dice = 0
-        scores[activePlayer] = 0;
+        dice = 0;
+        document.querySelector('.dice').style.display = 'none'
+        updateCurrentScoreUI(roundscore, activePlayer)
+        activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
+
+        toggleActive();
+        
 
     }
     roundscore += dice;
-    document.querySelector('#current-' + activePlayer).textContent = roundscore;
+    updateCurrentScoreUI(roundscore, activePlayer);
     
 }
 
+function holdBTN(){
+    scores[activePlayer] += roundscore;
+    if(scores[activePlayer] > 99){
 
-document.querySelector('#current-' + activePlayer).textContent = roundscore; // one way to update the html to reflect the current dice score
+    }else {
+        updateScoreUI(scores[activePlayer], activePlayer);
+        activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
+        roundscore = 0;
+        toggleActive();
+        document.querySelector('.dice').style.display = 'none'
+    }
+
+}
+
+function updateScoreUI(score, player){
+    document.getElementById('score-'+player).textContent = score;
+}
+function updateCurrentScoreUI(score, player){
+    document.getElementById('current-'+player).textContent = score;
+}
+function toggleActive(){
+    document.querySelector('.player-0-panel').classList.toggle('active');
+    document.querySelector('.player-1-panel').classList.toggle('active');
+}
+
+// document.querySelector('#current-' + activePlayer).textContent = roundscore; // one way to update the html to reflect the current dice score
 
 // document.querySelector('#current-'+activePlayer).innerHTML = "<em>" + dice + "</em>"; // another way is injecting html at the selected element to update the dom with the current dice value
 // worth remembering for scenarios where we need more than plain text dom manipulation
@@ -51,3 +82,6 @@ var x = document.querySelector('#score-0').textContent;
 // document.querySelector('.dice').style.display = 'none';
 
 document.querySelector('.btn-roll').addEventListener('click', rollDice);
+document.querySelector('.btn-hold').addEventListener('click', holdBTN);
+document.querySelector('.btn-new').addEventListener('click', initializeGame);
+
